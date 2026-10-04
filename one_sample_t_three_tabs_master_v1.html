@@ -1,0 +1,387 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>單一樣本 t 檢定｜三情境模擬系統</title><style>
+*{box-sizing:border-box}
+:root{--ink:#273744;--muted:#687780;--line:#d8e2e8;--blue:#315f7f;--blue2:#edf6fb;--amber:#a86425;--amber2:#fff7df;--green:#4f7b5b;--green2:#eef8f0;--red:#a45b5b;--red2:#fff0f0}
+body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;background:#f5f8fa;color:var(--ink)}
+header{background:#315d7b;color:#fff;padding:16px 22px}header h1{margin:0;font-size:24px}header p{margin:6px 0 0;line-height:1.6}
+.tabs{max-width:1500px;margin:12px auto 0;padding:0 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tabbtn{border:2px solid #b9cad4;background:#fff;color:#315d7b;border-radius:10px;padding:12px 8px;font-weight:900;cursor:pointer}.tabbtn.active{background:#315d7b;color:#fff;border-color:#315d7b}
+.tabpanel{display:none}.tabpanel.active{display:block}
+.layout{max-width:1500px;margin:auto;padding:14px;display:grid;grid-template-columns:minmax(420px,.95fr) minmax(600px,1.28fr);gap:14px}
+.pane{height:830px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #0001;scrollbar-gutter:stable}
+.sticky{position:sticky;top:0;z-index:10;background:#fff;padding:12px 16px;border-bottom:1px solid #e5ecef;font-size:19px;font-weight:900}
+.in{padding:14px}.card,.step{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:13px}.card h3,.step h3{margin:0 0 10px;color:#245574;font-size:17px}
+.story{background:var(--blue2);border-left:5px solid #4c8db5;padding:13px;border-radius:9px;line-height:1.8}.tip{background:var(--amber2);padding:12px;border-radius:9px;line-height:1.7}
+.ok{background:var(--green2);border-left:5px solid #6b9a72;padding:11px;border-radius:9px;line-height:1.65}.bad{background:var(--red2);border-left:5px solid #b66c6c;padding:11px;border-radius:9px;line-height:1.65}
+.big{font-size:18px;font-weight:900;text-align:center;padding:12px;background:#f1f6f8;border-radius:10px;line-height:1.65}.hidden{display:none!important}label{display:block;line-height:1.9}
+.btn{border:0;border-radius:9px;padding:10px 14px;margin:4px;font-weight:800;cursor:pointer;background:var(--blue);color:#fff}.btn.hot{background:var(--amber)}.btn.alt{background:#6a7e89}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{text-align:center;background:#eef5f8;border-radius:10px;padding:10px;min-width:0}.stat span{display:block;color:var(--muted);font-size:12px}.stat b{display:block;color:#245574;font-size:18px;margin-top:4px}
+.chart{height:310px;border:1px solid #d6e0e6;border-radius:10px;overflow:hidden;margin-top:10px}.chart svg{width:100%;height:100%}
+.values{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:180px;overflow:auto;margin-top:10px}.value{background:#f2f6f8;padding:7px;text-align:center;border-radius:7px;font-size:13px}
+.progress{height:8px;background:#edf1f4;border-radius:99px;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:#5f91ad;width:10%}
+.compare2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.comparebox{border:1px solid #d9e3e9;border-radius:10px;padding:12px;background:#f8fafb}.comparebox h4{margin:0 0 8px;color:#245574}.comparebox ul{margin:6px 0 0;padding-left:20px;line-height:1.7}
+.note{font-size:12px;color:var(--muted);line-height:1.6;border-top:1px dashed #ccd8df;padding-top:10px}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.pane{height:720px}}@media(max-width:650px){.tabs{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.compare2{grid-template-columns:1fr}.values{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<header><h1>📊 單一樣本 t 檢定｜三個幼兒園情境</h1>
+<p>核心流程：先建立 H₀ → 看樣本平均與參考平均的差 → H₀世界模擬 → 差值分布 → 常見／少見 → 正式單一樣本 t → Jamovi 驗證。</p></header><div class="tabs"><button class="tabbtn active" data-tab="tab1">分頁1｜基礎<br>幼兒平衡能力</button><button class="tabbtn " data-tab="tab2">分頁2｜進階<br>互動共讀後的詞彙表現</button><button class="tabbtn " data-tab="tab3">分頁3｜再進階<br>STEAM 問題解決表現</button></div><div id="tab1" class="tabpanel active"><div class="layout"><section class="pane"><div class="sticky">📝 左欄｜逐步引導（基礎）</div><div class="in">
+<div class="card"><div class="story"><b>情境一｜幼兒平衡能力</b><br>某幼兒園想了解大班幼兒的平衡能力分數，是否與高雄市同齡幼兒的參考平均 70 分不同。研究者抽取 20 位幼兒進行測驗。</div></div>
+<div class="card"><div class="big">一次只看一題 → 依題目操作右側系統 → 作答 → 立即回饋 → 下一步</div>
+<div id="progressText1" style="text-align:center;margin-top:8px;font-weight:800;color:#667784">第 1 / 7 題</div><div class="progress"><div id="progressBar1"></div></div></div><div class="step q wizard-step1" data-answer="0" data-exp="答對了。單一樣本 t 檢定先假設：母體平均數等於參考值 70。"><h3>第1題｜先建立 H₀</h3><p>哪一句最符合本情境的虛無假設（H₀）？</p><label><input type="radio" name="q1_0" value="0"> 先假設幼兒母體平均平衡能力 = 70</label><label><input type="radio" name="q1_0" value="1"> 先假設每一位幼兒都剛好是70分</label><label><input type="radio" name="q1_0" value="2"> 先假設樣本平均一定高於70</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="0" data-exp="研究樣本平均若高於70，先得到的是『觀察差值』，還不能立刻說母體真的不同。"><h3>第2題｜先看研究結果</h3><p>若研究樣本平均為74，與參考平均70相比，觀察差值是多少？</p><label><input type="radio" name="q1_1" value="0"> +4</label><label><input type="radio" name="q1_1" value="1"> −4</label><label><input type="radio" name="q1_1" value="2"> 144</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="0" data-exp="單一樣本 t 的核心比較是『樣本平均 − 參考平均』。"><h3>第3題｜真正比較的是什麼？</h3><p>哪一個量最適合作為第一個概念橋樑？</p><label><input type="radio" name="q1_2" value="0"> 樣本平均 − 參考平均</label><label><input type="radio" name="q1_2" value="1"> 每一位幼兒分數 − 另一位幼兒分數</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="1" data-exp="即使 H₀ 成立，抽到的樣本平均也不一定剛好等於70，因為樣本本來就會波動。"><h3>第4題｜請操作：H₀ 模擬一次</h3><p>請到右欄按「🎲 H₀模擬一次」。這次抽到的樣本平均一定剛好等於70嗎？</p><label><input type="radio" name="q1_3" value="0"> 一定</label><label><input type="radio" name="q1_3" value="1"> 不一定</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="0" data-exp="在 H₀ 世界中，很多次『樣本平均−70』會以0附近為中心。"><h3>第5題｜差值分布中心</h3><p>請再按幾次 H₀ 模擬。很多個『樣本平均−70』累積後，通常集中在哪裡？</p><label><input type="radio" name="q1_4" value="0"> 0附近</label><label><input type="radio" name="q1_4" value="1"> +4附近</label><label><input type="radio" name="q1_4" value="2"> 70附近</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="0" data-exp="1000次是在H₀成立的前提下重做1000個假想研究，建立樣本平均差值的參考分布。"><h3>第6題｜請操作：H₀ 模擬1000次</h3><p>按「▶ H₀模擬1000次」主要在回答什麼？</p><label><input type="radio" name="q1_5" value="0"> 若母體平均真的是70，單靠抽樣通常會出現多大的樣本平均差？</label><label><input type="radio" name="q1_5" value="1"> 有多少幼兒一定高於70？</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step1 hidden" data-answer="0" data-exp="如果目前研究差值在 H₀ 世界很少出現，就比較難只用抽樣波動解釋。"><h3>第7題｜常見還是少見？</h3><p>若 |樣本平均差| ≥ 目前研究差值 的比例很小，最適合怎麼說？</p><label><input type="radio" name="q1_6" value="0"> 目前研究結果在H₀世界少見，因此有理由懷疑H₀</label><label><input type="radio" name="q1_6" value="1"> 已經證明H₀一定錯</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div id="finish1" class="step hidden"><h3>🎉 完成本分頁</h3>
+<div class="big">樣本平均 → 與參考平均比較 → 平均差 → H₀下的差值分布 → 常見／少見 → 單一樣本 t</div>
+<button class="btn alt restartBtn" data-i="1">↺ 重新開始本分頁</button></div></div></section><section class="pane"><div class="sticky">🎮 右欄｜幼兒平衡能力</div><div class="in">
+
+<div class="card"><h3>先分清楚兩件事：研究樣本 vs. H₀世界模擬</h3>
+<div class="compare2">
+<div class="comparebox"><h4>① 重新抽「研究樣本」</h4><ul>
+<li>代表換一批新的幼兒研究資料。</li>
+<li>樣本平均、SD、觀察差值與正式 t 都會更新。</li>
+<li>回答：「如果換一批受試者，研究結果會不會有些不同？」</li>
+</ul></div>
+<div class="comparebox"><h4>② 在 H₀ 世界模擬</h4><ul>
+<li>不是再收真正研究資料。</li>
+<li>先假設母體平均真的等於參考值 70。</li>
+<li>重做很多個假想研究，建立『樣本平均−參考平均』的參考分布。</li>
+</ul></div></div>
+<div class="big" style="margin-top:10px">研究樣本 = 目前觀察結果　｜　H₀模擬 = 「母體平均=70」的參考世界</div>
+</div>
+
+<div class="card"><h3>研究資料｜目前這一批幼兒</h3>
+<div class="stats">
+<div class="stat"><span>樣本平均</span><b id="researchMean1">74.0</b></div>
+<div class="stat"><span>參考平均</span><b>70.0</b></div>
+<div class="stat"><span>觀察差值</span><b id="researchDiff1">+4.0</b></div>
+<div class="stat"><span>樣本數</span><b>n=20</b></div>
+</div>
+<div class="stats">
+<div class="stat"><span>樣本SD</span><b id="researchSD1">8.00</b></div>
+<div class="stat"><span>H₀</span><b>μ=70</b></div>
+<div class="stat"><span>變項</span><b>平衡能力分數</b></div>
+<div class="stat"><span>尾端</span><b>雙尾</b></div>
+</div>
+<div style="text-align:center;margin-top:10px"><button class="btn researchBtn" data-i="1">🔄 延伸探索：重新抽一組研究樣本</button></div>
+<div id="researchStatus1" class="tip" style="margin-top:8px">目前顯示預設研究樣本。重新抽樣會換一批真正研究資料；這不等於H₀模擬。</div>
+</div>
+
+<div class="card"><h3>① H₀世界：模擬一次</h3>
+<p>假設母體平均真的等於 <b>70</b>，每按一次就抽出 n=20 位幼兒，算一個樣本平均，再計算：</p>
+<div class="big">樣本平均 − 70</div>
+<div style="text-align:center">
+<button class="btn onceBtn" data-i="1">🎲 H₀模擬一次</button>
+<button class="btn hot thousandBtn" data-i="1">▶ H₀模擬1000次</button>
+<button class="btn alt resetBtn" data-i="1">↺ 重設H₀模擬</button>
+</div>
+<div id="status1" class="tip">先按「H₀模擬一次」，看看H₀成立時，樣本平均也會因抽樣而上下波動。</div>
+<div id="values1" class="values"></div>
+<div class="stats">
+<div class="stat"><span>本次樣本平均</span><b id="lastMean1">—</b></div>
+<div class="stat"><span>本次平均差</span><b id="lastDiff1">—</b></div>
+<div class="stat"><span>累積假想研究次數</span><b id="count1">0</b></div>
+<div class="stat"><span>H₀中心</span><b>0</b></div>
+</div></div>
+
+<div class="card"><h3>② H₀下的平均差值分布</h3>
+<div id="chart1" class="chart"></div>
+<div class="stats">
+<div class="stat"><span>目前研究差值</span><b id="chartObsDiff1">+4.0</b></div>
+<div class="stat"><span id="extremeLabel1">|差值|≥4.0</span><b id="extreme1">—</b></div>
+<div class="stat"><span>模擬比例</span><b id="prop1">—</b></div>
+<div class="stat"><span>判斷</span><b id="judge1">—</b></div>
+</div></div>
+
+<div class="card"><h3>③ 正式單一樣本 t 檢定</h3>
+<div class="story">
+平均差 = <b id="formalDiff1">+4.00</b><br>
+樣本SD = <b id="formalSD1">8.00</b><br>
+標準誤 = <b id="formalSE1">1.79</b><br>
+t(<span id="formalDf1">19</span>) = <b id="formalT1">2.24</b>
+</div>
+<div class="tip" style="margin-top:10px">先理解「平均差在H₀世界常不常見」，再把它標準化成 t 值。</div>
+</div>
+
+<div class="card"><h3>④ 下載 CSV，用 Jamovi 驗證</h3>
+<p>CSV包含 Score 一欄；若重新抽研究樣本，下載的是目前這一批新的研究資料。</p>
+<button class="btn alt csvBtn" data-i="1">下載目前研究樣本 CSV</button>
+<div class="note">Jamovi：Analyses → T-Tests → One Sample T-Test；Variables 放 Score；Test Value 輸入 70。本系統預設雙尾。</div>
+</div>
+
+</div></section></div></div><div id="tab2" class="tabpanel"><div class="layout"><section class="pane"><div class="sticky">📝 左欄｜逐步引導（進階）</div><div class="in">
+<div class="card"><div class="story"><b>情境二｜互動共讀後的詞彙表現</b><br>某幼兒園實施互動共讀後，研究者想知道大班幼兒的詞彙表現是否與既有參考平均 80 分不同。研究者抽取 24 位幼兒進行測驗。</div></div>
+<div class="card"><div class="big">一次只看一題 → 依題目操作右側系統 → 作答 → 立即回饋 → 下一步</div>
+<div id="progressText2" style="text-align:center;margin-top:8px;font-weight:800;color:#667784">第 1 / 7 題</div><div class="progress"><div id="progressBar2"></div></div></div><div class="step q wizard-step2" data-answer="0" data-exp="答對了。H₀ 是母體平均數等於參考值80，而不是每個人都等於80。"><h3>第1題｜先建立 H₀</h3><p>本情境的虛無假設是什麼？</p><label><input type="radio" name="q2_0" value="0"> 母體平均詞彙表現 = 80</label><label><input type="radio" name="q2_0" value="1"> 每位幼兒都必須等於80</label><label><input type="radio" name="q2_0" value="2"> 共讀後平均一定大於80</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="0" data-exp="觀察到差值，不代表一定少見；要看這種差值在H₀世界常不常出現。"><h3>第2題｜有差不等於少見</h3><p>如果樣本平均比80高1.5分，哪一句比較正確？</p><label><input type="radio" name="q2_1" value="0"> 先記錄有+1.5的差，再看它在H₀世界是否常見</label><label><input type="radio" name="q2_1" value="1"> 只要高1.5分就一定顯著</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="0" data-exp="樣本平均是從一批幼兒算出來的；換一批幼兒，平均數可能不同。"><h3>第3題｜重新抽研究樣本</h3><p>重新抽一組研究樣本主要是在做什麼？</p><label><input type="radio" name="q2_2" value="0"> 換一批真正的幼兒研究資料</label><label><input type="radio" name="q2_2" value="1"> 假設H₀後重做虛無世界模擬</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="0" data-exp="H₀模擬與重新抽研究樣本不同：前者是參考世界，後者是新的觀察資料。"><h3>第4題｜兩種重抽要分清楚</h3><p>哪一句正確？</p><label><input type="radio" name="q2_3" value="0"> 重新抽研究樣本 ≠ H₀世界模擬</label><label><input type="radio" name="q2_3" value="1"> 兩者完全一樣</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="0" data-exp="如果 |差值|≥目前研究差值 在 H₀ 模擬中出現很多次，代表目前研究結果是常見的。"><h3>第5題｜請操作：H₀ 模擬1000次</h3><p>若目前研究差值在H₀世界經常出現，較適合怎麼說？</p><label><input type="radio" name="q2_4" value="0"> 目前差值可能只是抽樣波動</label><label><input type="radio" name="q2_4" value="1"> 已經證明母體平均不等於80</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="1" data-exp="不拒絕H₀不代表證明H₀是真的，只代表目前沒有充分證據拒絕它。"><h3>第6題｜常見時怎麼說？</h3><p>若結果屬於『常見』，哪一句較正確？</p><label><input type="radio" name="q2_5" value="0"> 已證明母體平均就是80</label><label><input type="radio" name="q2_5" value="1"> 目前沒有充分理由拒絕H₀</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step2 hidden" data-answer="0" data-exp="正式 t 值就是把『樣本平均差』相對於其標準誤標準化。"><h3>第7題｜連到正式 t</h3><p>單一樣本 t 值最接近哪個意思？</p><label><input type="radio" name="q2_6" value="0"> 目前平均差相當於多少個標準誤</label><label><input type="radio" name="q2_6" value="1"> 樣本中有多少人超過參考值</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div id="finish2" class="step hidden"><h3>🎉 完成本分頁</h3>
+<div class="big">樣本平均 → 與參考平均比較 → 平均差 → H₀下的差值分布 → 常見／少見 → 單一樣本 t</div>
+<button class="btn alt restartBtn" data-i="2">↺ 重新開始本分頁</button></div></div></section><section class="pane"><div class="sticky">🎮 右欄｜互動共讀後的詞彙表現</div><div class="in">
+
+<div class="card"><h3>先分清楚兩件事：研究樣本 vs. H₀世界模擬</h3>
+<div class="compare2">
+<div class="comparebox"><h4>① 重新抽「研究樣本」</h4><ul>
+<li>代表換一批新的幼兒研究資料。</li>
+<li>樣本平均、SD、觀察差值與正式 t 都會更新。</li>
+<li>回答：「如果換一批受試者，研究結果會不會有些不同？」</li>
+</ul></div>
+<div class="comparebox"><h4>② 在 H₀ 世界模擬</h4><ul>
+<li>不是再收真正研究資料。</li>
+<li>先假設母體平均真的等於參考值 80。</li>
+<li>重做很多個假想研究，建立『樣本平均−參考平均』的參考分布。</li>
+</ul></div></div>
+<div class="big" style="margin-top:10px">研究樣本 = 目前觀察結果　｜　H₀模擬 = 「母體平均=80」的參考世界</div>
+</div>
+
+<div class="card"><h3>研究資料｜目前這一批幼兒</h3>
+<div class="stats">
+<div class="stat"><span>樣本平均</span><b id="researchMean2">81.5</b></div>
+<div class="stat"><span>參考平均</span><b>80.0</b></div>
+<div class="stat"><span>觀察差值</span><b id="researchDiff2">+1.5</b></div>
+<div class="stat"><span>樣本數</span><b>n=24</b></div>
+</div>
+<div class="stats">
+<div class="stat"><span>樣本SD</span><b id="researchSD2">9.00</b></div>
+<div class="stat"><span>H₀</span><b>μ=80</b></div>
+<div class="stat"><span>變項</span><b>詞彙表現分數</b></div>
+<div class="stat"><span>尾端</span><b>雙尾</b></div>
+</div>
+<div style="text-align:center;margin-top:10px"><button class="btn researchBtn" data-i="2">🔄 延伸探索：重新抽一組研究樣本</button></div>
+<div id="researchStatus2" class="tip" style="margin-top:8px">目前顯示預設研究樣本。重新抽樣會換一批真正研究資料；這不等於H₀模擬。</div>
+</div>
+
+<div class="card"><h3>① H₀世界：模擬一次</h3>
+<p>假設母體平均真的等於 <b>80</b>，每按一次就抽出 n=24 位幼兒，算一個樣本平均，再計算：</p>
+<div class="big">樣本平均 − 80</div>
+<div style="text-align:center">
+<button class="btn onceBtn" data-i="2">🎲 H₀模擬一次</button>
+<button class="btn hot thousandBtn" data-i="2">▶ H₀模擬1000次</button>
+<button class="btn alt resetBtn" data-i="2">↺ 重設H₀模擬</button>
+</div>
+<div id="status2" class="tip">先按「H₀模擬一次」，看看H₀成立時，樣本平均也會因抽樣而上下波動。</div>
+<div id="values2" class="values"></div>
+<div class="stats">
+<div class="stat"><span>本次樣本平均</span><b id="lastMean2">—</b></div>
+<div class="stat"><span>本次平均差</span><b id="lastDiff2">—</b></div>
+<div class="stat"><span>累積假想研究次數</span><b id="count2">0</b></div>
+<div class="stat"><span>H₀中心</span><b>0</b></div>
+</div></div>
+
+<div class="card"><h3>② H₀下的平均差值分布</h3>
+<div id="chart2" class="chart"></div>
+<div class="stats">
+<div class="stat"><span>目前研究差值</span><b id="chartObsDiff2">+1.5</b></div>
+<div class="stat"><span id="extremeLabel2">|差值|≥1.5</span><b id="extreme2">—</b></div>
+<div class="stat"><span>模擬比例</span><b id="prop2">—</b></div>
+<div class="stat"><span>判斷</span><b id="judge2">—</b></div>
+</div></div>
+
+<div class="card"><h3>③ 正式單一樣本 t 檢定</h3>
+<div class="story">
+平均差 = <b id="formalDiff2">+1.50</b><br>
+樣本SD = <b id="formalSD2">9.00</b><br>
+標準誤 = <b id="formalSE2">1.84</b><br>
+t(<span id="formalDf2">23</span>) = <b id="formalT2">0.82</b>
+</div>
+<div class="tip" style="margin-top:10px">先理解「平均差在H₀世界常不常見」，再把它標準化成 t 值。</div>
+</div>
+
+<div class="card"><h3>④ 下載 CSV，用 Jamovi 驗證</h3>
+<p>CSV包含 Score 一欄；若重新抽研究樣本，下載的是目前這一批新的研究資料。</p>
+<button class="btn alt csvBtn" data-i="2">下載目前研究樣本 CSV</button>
+<div class="note">Jamovi：Analyses → T-Tests → One Sample T-Test；Variables 放 Score；Test Value 輸入 80。本系統預設雙尾。</div>
+</div>
+
+</div></section></div></div><div id="tab3" class="tabpanel"><div class="layout"><section class="pane"><div class="sticky">📝 左欄｜逐步引導（再進階）</div><div class="in">
+<div class="card"><div class="story"><b>情境三｜STEAM 問題解決表現</b><br>研究者想了解接受 STEAM 探索活動後，幼兒的問題解決分數是否與參考平均 60 分不同。此分頁進一步強調：同樣的平均差，樣本數與樣本變異不同，t 值也可能不同。</div></div>
+<div class="card"><div class="big">一次只看一題 → 依題目操作右側系統 → 作答 → 立即回饋 → 下一步</div>
+<div id="progressText3" style="text-align:center;margin-top:8px;font-weight:800;color:#667784">第 1 / 7 題</div><div class="progress"><div id="progressBar3"></div></div></div><div class="step q wizard-step3" data-answer="0" data-exp="答對了。H₀仍是母體平均=60。"><h3>第1題｜先建立 H₀</h3><p>本情境中 H₀ 最適合怎麼說？</p><label><input type="radio" name="q3_0" value="0"> 幼兒母體平均問題解決分數 = 60</label><label><input type="radio" name="q3_0" value="1"> 每位幼兒都剛好60分</label><label><input type="radio" name="q3_0" value="2"> STEAM一定讓平均變高</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="真正觀察的是『樣本平均−60』，而不是只看樣本平均本身。"><h3>第2題｜觀察統計量</h3><p>哪個量最能直接表達目前研究和參考值差多少？</p><label><input type="radio" name="q3_1" value="0"> 樣本平均 − 60</label><label><input type="radio" name="q3_1" value="1"> 樣本平均 + 60</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="同樣差4分，如果樣本數更大或變異更小，標準誤會更小，t值通常更大。"><h3>第3題｜為什麼不能只看『差幾分』？</h3><p>判斷4分是否少見，還需要考慮什麼？</p><label><input type="radio" name="q3_2" value="0"> 樣本數與樣本變異</label><label><input type="radio" name="q3_2" value="1"> 只看4分本身</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="標準誤描述『樣本平均』會有多大的抽樣波動。"><h3>第4題｜標準誤在這裡代表什麼？</h3><p>哪一句比較接近單一樣本 t 中的標準誤？</p><label><input type="radio" name="q3_3" value="0"> 在重複抽樣下，樣本平均通常會波動多少</label><label><input type="radio" name="q3_3" value="1"> 每位幼兒的原始分數</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="t = 平均差 / 標準誤，因此相同差值在不同n或SD下可能得到不同t。"><h3>第5題｜從差值走向 t</h3><p>相依於哪些條件，t值會改變？</p><label><input type="radio" name="q3_4" value="0"> 平均差、樣本數與樣本SD</label><label><input type="radio" name="q3_4" value="1"> 只和平均差有關</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="H₀世界先讓母體平均固定在60，再重做很多假想研究。"><h3>第6題｜請操作：H₀ 模擬1000次</h3><p>H₀模擬中的母體平均設定在哪裡？</p><label><input type="radio" name="q3_5" value="0"> 60</label><label><input type="radio" name="q3_5" value="1"> 目前研究樣本平均</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div class="step q wizard-step3 hidden" data-answer="0" data-exp="Jamovi 的 One Sample T-Test 與模擬系統都在回答：目前樣本平均相對於60的差，在H₀世界是否少見。"><h3>第7題｜用 Jamovi 驗證</h3><p>正式單一樣本 t 與模擬系統共同在回答什麼？</p><label><input type="radio" name="q3_6" value="0"> 目前研究差值在『母體平均=60』的世界是否少見</label><label><input type="radio" name="q3_6" value="1"> 樣本中最高分是多少</label><div class="feedback"></div><button class="btn nextBtn" disabled>下一步 →</button></div><div id="finish3" class="step hidden"><h3>🎉 完成本分頁</h3>
+<div class="big">樣本平均 → 與參考平均比較 → 平均差 → H₀下的差值分布 → 常見／少見 → 單一樣本 t</div>
+<button class="btn alt restartBtn" data-i="3">↺ 重新開始本分頁</button></div></div></section><section class="pane"><div class="sticky">🎮 右欄｜STEAM 問題解決表現</div><div class="in">
+
+<div class="card"><h3>先分清楚兩件事：研究樣本 vs. H₀世界模擬</h3>
+<div class="compare2">
+<div class="comparebox"><h4>① 重新抽「研究樣本」</h4><ul>
+<li>代表換一批新的幼兒研究資料。</li>
+<li>樣本平均、SD、觀察差值與正式 t 都會更新。</li>
+<li>回答：「如果換一批受試者，研究結果會不會有些不同？」</li>
+</ul></div>
+<div class="comparebox"><h4>② 在 H₀ 世界模擬</h4><ul>
+<li>不是再收真正研究資料。</li>
+<li>先假設母體平均真的等於參考值 60。</li>
+<li>重做很多個假想研究，建立『樣本平均−參考平均』的參考分布。</li>
+</ul></div></div>
+<div class="big" style="margin-top:10px">研究樣本 = 目前觀察結果　｜　H₀模擬 = 「母體平均=60」的參考世界</div>
+</div>
+
+<div class="card"><h3>研究資料｜目前這一批幼兒</h3>
+<div class="stats">
+<div class="stat"><span>樣本平均</span><b id="researchMean3">64.0</b></div>
+<div class="stat"><span>參考平均</span><b>60.0</b></div>
+<div class="stat"><span>觀察差值</span><b id="researchDiff3">+4.0</b></div>
+<div class="stat"><span>樣本數</span><b>n=30</b></div>
+</div>
+<div class="stats">
+<div class="stat"><span>樣本SD</span><b id="researchSD3">10.00</b></div>
+<div class="stat"><span>H₀</span><b>μ=60</b></div>
+<div class="stat"><span>變項</span><b>問題解決分數</b></div>
+<div class="stat"><span>尾端</span><b>雙尾</b></div>
+</div>
+<div style="text-align:center;margin-top:10px"><button class="btn researchBtn" data-i="3">🔄 延伸探索：重新抽一組研究樣本</button></div>
+<div id="researchStatus3" class="tip" style="margin-top:8px">目前顯示預設研究樣本。重新抽樣會換一批真正研究資料；這不等於H₀模擬。</div>
+</div>
+
+<div class="card"><h3>① H₀世界：模擬一次</h3>
+<p>假設母體平均真的等於 <b>60</b>，每按一次就抽出 n=30 位幼兒，算一個樣本平均，再計算：</p>
+<div class="big">樣本平均 − 60</div>
+<div style="text-align:center">
+<button class="btn onceBtn" data-i="3">🎲 H₀模擬一次</button>
+<button class="btn hot thousandBtn" data-i="3">▶ H₀模擬1000次</button>
+<button class="btn alt resetBtn" data-i="3">↺ 重設H₀模擬</button>
+</div>
+<div id="status3" class="tip">先按「H₀模擬一次」，看看H₀成立時，樣本平均也會因抽樣而上下波動。</div>
+<div id="values3" class="values"></div>
+<div class="stats">
+<div class="stat"><span>本次樣本平均</span><b id="lastMean3">—</b></div>
+<div class="stat"><span>本次平均差</span><b id="lastDiff3">—</b></div>
+<div class="stat"><span>累積假想研究次數</span><b id="count3">0</b></div>
+<div class="stat"><span>H₀中心</span><b>0</b></div>
+</div></div>
+
+<div class="card"><h3>② H₀下的平均差值分布</h3>
+<div id="chart3" class="chart"></div>
+<div class="stats">
+<div class="stat"><span>目前研究差值</span><b id="chartObsDiff3">+4.0</b></div>
+<div class="stat"><span id="extremeLabel3">|差值|≥4.0</span><b id="extreme3">—</b></div>
+<div class="stat"><span>模擬比例</span><b id="prop3">—</b></div>
+<div class="stat"><span>判斷</span><b id="judge3">—</b></div>
+</div></div>
+
+<div class="card"><h3>③ 正式單一樣本 t 檢定</h3>
+<div class="story">
+平均差 = <b id="formalDiff3">+4.00</b><br>
+樣本SD = <b id="formalSD3">10.00</b><br>
+標準誤 = <b id="formalSE3">1.83</b><br>
+t(<span id="formalDf3">29</span>) = <b id="formalT3">2.19</b>
+</div>
+<div class="tip" style="margin-top:10px">先理解「平均差在H₀世界常不常見」，再把它標準化成 t 值。</div>
+</div>
+
+<div class="card"><h3>④ 下載 CSV，用 Jamovi 驗證</h3>
+<p>CSV包含 Score 一欄；若重新抽研究樣本，下載的是目前這一批新的研究資料。</p>
+<button class="btn alt csvBtn" data-i="3">下載目前研究樣本 CSV</button>
+<div class="note">Jamovi：Analyses → T-Tests → One Sample T-Test；Variables 放 Score；Test Value 輸入 60。本系統預設雙尾。</div>
+</div>
+
+</div></section></div></div><script>
+(function(){
+const cfgs=[{"id": 1, "n": 20, "mu0": 70.0, "trueMean": 74.0, "popSD": 8.0, "csvName": "one_sample_t_s1_balance.csv"}, {"id": 2, "n": 24, "mu0": 80.0, "trueMean": 81.5, "popSD": 9.0, "csvName": "one_sample_t_s2_vocabulary.csv"}, {"id": 3, "n": 30, "mu0": 60.0, "trueMean": 64.0, "popSD": 10.0, "csvName": "one_sample_t_s3_steam.csv"}];
+const states={};cfgs.forEach(c=>states[c.id]={nullDiffs:[],research:null});
+
+function normal(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function mean(a){return a.reduce((s,x)=>s+x,0)/a.length}
+function sampleSD(a){const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1))}
+function sample(n,mu,sd){return Array.from({length:n},()=>mu+sd*normal())}
+
+function makeResearch(c){const values=sample(c.n,c.trueMean,c.popSD);return {values,m:mean(values),sd:sampleSD(values)};}
+function makeNull(c){const values=sample(c.n,c.mu0,c.popSD);return {values,m:mean(values)};}
+function currentMean(i){return states[i].research?states[i].research.m:cfgs[i-1].trueMean}
+function currentSD(i){return states[i].research?states[i].research.sd:cfgs[i-1].popSD}
+function currentDiff(i){const c=cfgs[i-1];return currentMean(i)-c.mu0}
+
+function resampleResearch(i){
+ const c=cfgs[i-1],r=makeResearch(c);states[i].research=r;
+ const d=r.m-c.mu0,se=r.sd/Math.sqrt(c.n),t=d/se;
+ document.getElementById("researchMean"+i).textContent=r.m.toFixed(1);
+ document.getElementById("researchDiff"+i).textContent=(d>=0?"+":"")+d.toFixed(1);
+ document.getElementById("researchSD"+i).textContent=r.sd.toFixed(2);
+ document.getElementById("formalDiff"+i).textContent=(d>=0?"+":"")+d.toFixed(2);
+ document.getElementById("formalSD"+i).textContent=r.sd.toFixed(2);
+ document.getElementById("formalSE"+i).textContent=se.toFixed(2);
+ document.getElementById("formalDf"+i).textContent=(c.n-1);
+ document.getElementById("formalT"+i).textContent=t.toFixed(2);
+ states[i].nullDiffs=[];
+ clearNull(i);
+ document.getElementById("researchStatus"+i).innerHTML="已換成新的研究樣本。新的樣本平均 = <b>"+r.m.toFixed(2)+"</b>，平均差 = <b>"+(d>=0?"+":"")+d.toFixed(2)+"</b>。舊的H₀模擬結果已清除。";
+ update(i);
+}
+
+function renderValues(i,values){
+ const box=document.getElementById("values"+i);box.innerHTML="";
+ values.forEach(v=>{const d=document.createElement("div");d.className="value";d.textContent=v.toFixed(1);box.appendChild(d);});
+}
+
+function once(i){
+ const c=cfgs[i-1],r=makeNull(c),d=r.m-c.mu0;states[i].nullDiffs.push(d);
+ renderValues(i,r.values);
+ document.getElementById("lastMean"+i).textContent=r.m.toFixed(2);
+ document.getElementById("lastDiff"+i).textContent=(d>=0?"+":"")+d.toFixed(2);
+ document.getElementById("status"+i).innerHTML="這是一個H₀假想研究：樣本平均 = <b>"+r.m.toFixed(2)+"</b>，因此樣本平均−參考平均 = <b>"+(d>=0?"+":"")+d.toFixed(2)+"</b>。";
+ update(i);
+}
+
+function thousand(i){
+ const c=cfgs[i-1];states[i].nullDiffs=[];
+ for(let r=0;r<1000;r++){const x=makeNull(c);states[i].nullDiffs.push(x.m-c.mu0);}
+ document.getElementById("status"+i).innerHTML="完成 <b>1000 個H₀假想研究</b>。每一個值都是『樣本平均−參考平均』。";
+ update(i);
+}
+
+function clearNull(i){
+ document.getElementById("values"+i).innerHTML="";
+ document.getElementById("lastMean"+i).textContent="—";
+ document.getElementById("lastDiff"+i).textContent="—";
+ document.getElementById("status"+i).textContent="研究樣本已更換，舊H₀模擬結果已清除。請重新執行H₀模擬。";
+}
+function resetNull(i){
+ states[i].nullDiffs=[];clearNull(i);
+ document.getElementById("status"+i).textContent="H₀模擬已重設；研究樣本沒有改變。";
+ update(i);
+}
+
+function update(i){
+ const vals=states[i].nullDiffs,obs=currentDiff(i),n=vals.length,ex=vals.filter(v=>Math.abs(v)>=Math.abs(obs)).length,p=n?ex/n:0;
+ document.getElementById("count"+i).textContent=n;
+ document.getElementById("chartObsDiff"+i).textContent=(obs>=0?"+":"")+obs.toFixed(1);
+ document.getElementById("extremeLabel"+i).textContent="|差值|≥"+Math.abs(obs).toFixed(1);
+ document.getElementById("extreme"+i).textContent=n?ex+"次":"—";
+ document.getElementById("prop"+i).textContent=n?(p*100).toFixed(1)+"%":"—";
+ document.getElementById("judge"+i).textContent=n>=100?(p<.05?"少見":"常見"):"—";
+ draw(i);
+}
+
+function draw(i){
+ const c=cfgs[i-1],vals=states[i].nullDiffs,obs=currentDiff(i),W=760,H=300,L=45,R=18,T=20,B=42;
+ const se=c.popSD/Math.sqrt(c.n),span=Math.max(Math.abs(obs)*1.55,se*4.2,3),min=-span,max=span,bins=36,counts=Array(bins).fill(0);
+ vals.forEach(v=>{const k=Math.floor((v-min)/(max-min)*bins);if(k>=0&&k<bins)counts[k]++;});
+ const peak=Math.max(1,...counts),pw=W-L-R,ph=H-T-B;
+ let svg='<svg viewBox="0 0 '+W+' '+H+'"><line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(W-R)+'" y2="'+(T+ph)+'" stroke="#667"/>';
+ for(let b=0;b<bins;b++){const center=min+(b+.5)*(max-min)/bins,x=L+b*pw/bins,w=pw/bins-1,h=counts[b]/peak*ph,ext=Math.abs(center)>=Math.abs(obs);svg+='<rect x="'+x+'" y="'+(T+ph-h)+'" width="'+w+'" height="'+h+'" fill="'+(ext?'#d48650':'#6b9bb8')+'"/>';}
+ for(let k=0;k<7;k++){const v=min+k*(max-min)/6,x=L+(v-min)/(max-min)*pw;svg+='<text x="'+x+'" y="'+(H-12)+'" text-anchor="middle" font-size="12">'+v.toFixed(1)+'</text>';}
+ const x0=L+(0-min)/(max-min)*pw;svg+='<line x1="'+x0+'" y1="'+T+'" x2="'+x0+'" y2="'+(T+ph)+'" stroke="#555" stroke-width="2" stroke-dasharray="5 4"/><text x="'+(x0+5)+'" y="34" font-size="12">H₀差值=0</text>';
+ [obs,-obs].forEach((v,j)=>{const x=L+(v-min)/(max-min)*pw;svg+='<line x1="'+x+'" y1="'+T+'" x2="'+x+'" y2="'+(T+ph)+'" stroke="#a34c25" stroke-width="'+(j?2:3)+'" '+(j?'stroke-dasharray="5 4"':'')+'/>';}); 
+ const xo=L+(obs-min)/(max-min)*pw;svg+='<text x="'+(xo+5)+'" y="53" font-size="12">目前研究差值 '+(obs>=0?"+":"")+obs.toFixed(1)+'</text><text x="'+(L+pw/2)+'" y="'+(H-2)+'" text-anchor="middle" font-size="12">樣本平均 − 參考平均</text></svg>';
+ document.getElementById("chart"+i).innerHTML=svg;
+}
+
+function makeDefaultDataset(c){
+ const raw=Array.from({length:c.n},(_,k)=>k-(c.n-1)/2),m=mean(raw),sd=sampleSD(raw);
+ return raw.map(x=>c.trueMean+(x-m)*c.popSD/sd);
+}
+function downloadCSV(i){
+ const c=cfgs[i-1],vals=states[i].research?states[i].research.values:makeDefaultDataset(c);
+ let csv="Score\n";vals.forEach(x=>csv+=x.toFixed(2)+"\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download=c.csvName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+document.querySelectorAll(".researchBtn").forEach(b=>b.addEventListener("click",()=>resampleResearch(+b.dataset.i)));
+document.querySelectorAll(".onceBtn").forEach(b=>b.addEventListener("click",()=>once(+b.dataset.i)));
+document.querySelectorAll(".thousandBtn").forEach(b=>b.addEventListener("click",()=>thousand(+b.dataset.i)));
+document.querySelectorAll(".resetBtn").forEach(b=>b.addEventListener("click",()=>resetNull(+b.dataset.i)));
+document.querySelectorAll(".csvBtn").forEach(b=>b.addEventListener("click",()=>downloadCSV(+b.dataset.i)));
+document.querySelectorAll(".tabbtn").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".tabpanel").forEach(p=>p.classList.remove("active"));btn.classList.add("active");document.getElementById(btn.dataset.tab).classList.add("active");}));
+
+[1,2,3].forEach(i=>{
+ const steps=[...document.querySelectorAll(".wizard-step"+i)];
+ function show(k){steps.forEach((s,j)=>s.classList.toggle("hidden",j!==k));document.getElementById("finish"+i).classList.add("hidden");document.getElementById("progressText"+i).textContent="第 "+(k+1)+" / "+steps.length+" 題";document.getElementById("progressBar"+i).style.width=((k+1)/steps.length*100)+"%";}
+ steps.forEach((step,k)=>{const ans=step.dataset.answer,exp=step.dataset.exp,next=step.querySelector(".nextBtn");step.querySelectorAll('input[type="radio"]').forEach(r=>r.addEventListener("change",()=>{const fb=step.querySelector(".feedback");if(r.value===ans){fb.className="feedback ok";fb.innerHTML="<b>答對了。</b> "+exp;}else{fb.className="feedback bad";fb.innerHTML="<b>再想一下。</b> "+exp;}next.disabled=false;}));next.addEventListener("click",()=>{if(k<steps.length-1)show(k+1);else{steps.forEach(s=>s.classList.add("hidden"));document.getElementById("finish"+i).classList.remove("hidden");document.getElementById("progressText"+i).textContent="已完成 "+steps.length+" / "+steps.length+" 題";document.getElementById("progressBar"+i).style.width="100%";}});});
+ document.querySelector('.restartBtn[data-i="'+i+'"]').addEventListener("click",()=>{steps.forEach(s=>{s.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=false);const fb=s.querySelector(".feedback");fb.className="feedback";fb.innerHTML="";s.querySelector(".nextBtn").disabled=true;});show(0);});
+ show(0);draw(i);
+});
+})();
+</script></body></html>
